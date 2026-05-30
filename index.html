@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dart Extension Conflict - Penjelasan & Solusi</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a2a3a 0%, #0e1a24 100%);
+            min-height: 100vh;
+            padding: 2rem;
+            color: #e0e0e0;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: rgba(30, 40, 50, 0.85);
+            backdrop-filter: blur(10px);
+            border-radius: 2rem;
+            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.05);
+            overflow: hidden;
+            padding: 2rem 2rem 2.5rem;
+        }
+
+        h1 {
+            font-size: 1.9rem;
+            background: linear-gradient(120deg, #66c0ff, #b3e0ff);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        h1::before {
+            content: "⚡";
+            font-size: 2rem;
+            background: none;
+            -webkit-background-clip: unset;
+            color: #ffb347;
+        }
+
+        .badge {
+            background: #2c3e2f;
+            color: #a5d6a5;
+            padding: 0.2rem 0.8rem;
+            border-radius: 40px;
+            font-size: 0.8rem;
+            font-weight: normal;
+            letter-spacing: 0.5px;
+            border-left: 3px solid #6fbf6f;
+        }
+
+        .subtitle {
+            color: #9aaebf;
+            margin-bottom: 2rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px dashed #3a4a5a;
+        }
+
+        .code-block {
+            background: #0f1a1f;
+            border-radius: 1.2rem;
+            padding: 1.2rem 1.5rem;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+            font-family: 'Fira Code', 'Cascadia Code', monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.5), 0 5px 10px rgba(0, 0, 0, 0.2);
+            border-left: 5px solid #ff9f4a;
+        }
+
+        .code-block pre {
+            margin: 0;
+            color: #cbd5e6;
+        }
+
+        .question-card, .answer-card, .solution-card {
+            background: rgba(20, 30, 38, 0.7);
+            border-radius: 1.2rem;
+            padding: 1.2rem 1.7rem;
+            margin: 1.5rem 0;
+            transition: all 0.2s ease;
+        }
+
+        .question-card {
+            border-left: 6px solid #ffaa44;
+            background: rgba(255, 170, 68, 0.08);
+        }
+
+        .answer-card {
+            border-left: 6px solid #66ccff;
+            background: rgba(102, 204, 255, 0.05);
+        }
+
+        .solution-card {
+            border-left: 6px solid #6fcf97;
+            background: rgba(111, 207, 151, 0.05);
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        h3 {
+            font-size: 1.2rem;
+            margin: 1rem 0 0.5rem 0;
+            color: #d4e6ff;
+        }
+
+        .danger-note {
+            background: #3a2a2a;
+            border-radius: 1rem;
+            padding: 0.8rem 1.2rem;
+            margin: 1rem 0;
+            border-left: 5px solid #ff7b72;
+        }
+
+        .solution-note {
+            background: #1e3a2a;
+            border-radius: 1rem;
+            padding: 0.8rem 1.2rem;
+            margin: 1rem 0;
+            border-left: 5px solid #6fcf97;
+        }
+
+        .method-list {
+            margin: 0.8rem 0 0.8rem 1.8rem;
+        }
+
+        .method-list li {
+            margin: 0.5rem 0;
+        }
+
+        hr {
+            margin: 1.5rem 0;
+            border: none;
+            height: 1px;
+            background: linear-gradient(90deg, #2a3a44, #5f7f8f, #2a3a44);
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 2rem;
+            font-size: 0.75rem;
+            color: #6a7e8c;
+        }
+        
+        .keyword {
+            color: #ffb86c;
+            font-weight: 600;
+        }
+        .type {
+            color: #6bc4ff;
+        }
+        .comment {
+            color: #6a9955;
+        }
+        .error {
+            color: #ff7e67;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>
+        Konflik Nama Method di Extension Dart
+        <span class="badge">Extension clash</span>
+    </h1>
+    <div class="subtitle">Analisis dampak & strategi resolusi konflik <code>toString()</code> pada dua extension berbeda</div>
+
+    <!-- Soal kutipan ulang -->
+    <div class="question-card">
+        <h2>📌 Soal 1 · Konflik Nama Antar Extension</h2>
+        <p>Perhatikan kode berikut:</p>
+        <div class="code-block">
+            <pre>
+<span class="keyword">extension</span> <span class="type">StringNumber</span> <span class="keyword">on</span> String {
+    <span class="type">int</span> toString() {
+        <span class="keyword">return</span> toString(<span class="keyword">this</span>);
+    }
+}
+
+<span class="keyword">extension</span> <span class="type">StringDouble</span> <span class="keyword">on</span> String {
+    <span class="type">double</span> toString() {   <span class="comment">// ← method sama, return type berbeda</span>
+        <span class="keyword">return</span> toString(<span class="keyword">this</span>);
+    }
+}
+
+<span class="type">void</span> main() {
+    String angka = <span class="string">'123'</span>;
+    print(angka.toString());
+}
+            </pre>
+        </div>
+        <p><strong>Pertanyaan:</strong> Apa yang terjadi saat kode dijalankan? Jelaskan penyebabnya dan berikan solusi agar kedua extension dapat digunakan tanpa konflik.</p>
+    </div>
+
+    <!-- Penjelasan: apa yang terjadi -->
+    <div class="answer-card">
+        <h2>⚠️ Apa yang Terjadi Saat Dijalankan?</h2>
+        <div class="danger-note">
+            <strong>❌ Kode GAGAL dikompilasi / error</strong><br>
+            Compiler Dart akan melaporkan <strong>ambiguous extension reference</strong> atau <strong>conflicting extension methods</strong>. 
+            Pesan error seperti:<br>
+            <em>"The method 'toString' is defined in multiple extensions: 'StringNumber' and 'StringDouble'. Try using the extension explicitly."</em>
+        </div>
+        <h3>🔍 Penyebab Utama</h3>
+        <ul class="method-list">
+            <li><strong>Nama method identik</strong> — Kedua extension (<code>StringNumber</code> dan <code>StringDouble</code>) sama-sama mendefinisikan method <code>toString()</code> pada tipe <code>String</code>.</li>
+            <li><strong>Signature method sama persis (dari sisi nama & parameter)</strong> — Meskipun memiliki return type berbeda (<code>int</code> vs <code>double</code>), Dart <strong>tidak menganggap return type sebagai bagian dari signature</strong> untuk overload resolution. Akibatnya compiler tidak bisa membedakan method hanya dari return type.</li>
+            <li><strong>Ekstensi saling tumpang tindih</strong> — Saat memanggil <code>angka.toString()</code>, Dart tidak tahu extension mana yang dimaksud. Prioritas implicit extension tidak bisa menyelesaikan konflik karena kedua extension memiliki tingkat 'khusus' yang sama (sama-sama on String).</li>
+            <li><strong>Masalah tambahan di dalam body method</strong> — Selain konflik, kode di dalam extension juga mengandung <strong>rekursi tak terbatas</strong> (<code>return toString(this)</code> tanpa <code>this.</code> akan memanggil dirinya sendiri, bahkan kalau tidak error konflik akan stack overflow). Namun yang utama error kompilasi lebih dulu.</li>
+        </ul>
+        <p>Jadi intinya: <span class="error">konflik nama method toString() di dua extension yang sama-sama apply ke String</span> menyebabkan kode tidak bisa dikompilasi.</p>
+    </div>
+
+    <!-- Solusi -->
+    <div class="solution-card">
+        <h2>🧩 Solusi Agar Kedua Extension Dapat Digunakan Tanpa Konflik</h2>
+        <p>Ada beberapa pendekatan yang bisa dipakai, tergantung tujuan penggunaan. Berikut solusi paling efektif:</p>
+
+        <h3>✅ 1. Gunakan Nama Method yang Berbeda (Rekomendasi utama)</h3>
+        <div class="code-block">
+            <pre>
+<span class="keyword">extension</span> <span class="type">StringNumber</span> <span class="keyword">on</span> String {
+    <span class="type">int</span> toIntFromString() {
+        <span class="keyword">return</span> int.parse(<span class="keyword">this</span>);
+    }
+}
+
+<span class="keyword">extension</span> <span class="type">StringDouble</span> <span class="keyword">on</span> String {
+    <span class="type">double</span> toDoubleFromString() {
+        <span class="keyword">return</span> double.parse(<span class="keyword">this</span>);
+    }
+}
+
+<span class="type">void</span> main() {
+    String angka = <span class="string">'123'</span>;
+    print(angka.toIntFromString());    <span class="comment">// output: 123 (int)</span>
+    print(angka.toDoubleFromString()); <span class="comment">// output: 123.0 (double)</span>
+}
+            </pre>
+        </div>
+        <p>Dengan memberi nama method berbeda (<code>toIntFromString</code> dan <code>toDoubleFromString</code>), konflik hilang dan kedua extension bisa hidup berdampingan.</p>
+
+        <h3>✅ 2. Panggil Extension Secara Eksplisit (Tanpa mengubah nama method)</h3>
+        <div class="code-block">
+            <pre>
+<span class="comment">// extension tetap seperti semula (dengan perbaikan implementasi)</span>
+<span class="keyword">extension</span> <span class="type">StringNumber</span> <span class="keyword">on</span> String {
+    <span class="type">int</span> toStringNumber() {   <span class="comment">// ubah nama jadi tidak bentrok, tapi contoh tetap pakai explicit</span>
+        <span class="keyword">return</span> int.parse(<span class="keyword">this</span>);
+    }
+}
+<span class="comment">// TAPI kalau terpaksa ingin tetap pakai method toString (tidak disarankan),  
+// panggil menggunakan syntax: ExtensionName(object).method()</span>
+<span class="type">void</span> main() {
+    String angka = <span class="string">'123'</span>;
+    <span class="comment">// tidak ambigu: panggil extension tertentu</span>
+    print(StringNumber(angka).toString());   <span class="comment">// asumsi toString di StringNumber mengembalikan int</span>
+    print(StringDouble(angka).toString());   <span class="comment">// memanggil versi double</span>
+}
+            </pre>
+        </div>
+        <div class="solution-note">
+            💡 Dart memungkinkan pemanggilan eksplisit: <code>ExtensionName(instance).method()</code>. Meskipun method namanya sama, karena extension disebut secara eksplisit, tidak ada ambiguitas.
+        </div>
+
+        <h3>✅ 3. Gunakan Tipe Parameter Bantu Atau Method Berbeda Dalam Satu Extension (Refactoring)</h3>
+        <p>Jika kedua fungsi tersebut bersifat <em>utility</em> yang erat kaitannya, lebih baik satukan dalam satu extension dengan nama method berbeda:</p>
+        <div class="code-block">
+            <pre>
+<span class="keyword">extension</span> <span class="type">StringParsing</span> <span class="keyword">on</span> String {
+    <span class="type">int</span> asInt() => int.parse(<span class="keyword">this</span>);
+    <span class="type">double</span> asDouble() => double.parse(<span class="keyword">this</span>);
+}
+
+<span class="type">void</span> main() {
+    String angka = <span class="string">'123'</span>;
+    print(angka.asInt());     <span class="comment">// 123</span>
+    print(angka.asDouble());  <span class="comment">// 123.0</span>
+}
+            </pre>
+        </div>
+        <h3>✅ 4. Menghindari Override Method Fundamental (toString)</h3>
+        <p>Method <code>toString()</code> adalah method bawaan dari <code>Object</code>. Mendefinisikan ulang <code>toString</code> di extension pada <code>String</code> sangat tidak disarankan karena dapat membingungkan dan konflik seperti ini. Lebih baik gunakan nama deskriptif lain.</p>
+        <hr>
+        <p><strong>Kesimpulan solusi paling clean:</strong> <span style="color:#b3ffcf;">ubah nama method agar unik</span> atau <span style="color:#b3ffcf;">panggil extension secara eksplisit</span> jika terpaksa method-nya harus bernama sama untuk keperluan desain tertentu (jarang). Pada kasus kode asli juga perlu diperbaiki implementasi yang rekursif dengan menggunakan <code>int.parse</code> / <code>double.parse</code>.</p>
+    </div>
+
+    <!-- perbaikan implementasi konkret -->
+    <div class="answer-card">
+        <h3>✨ Contoh Perbaikan Total (Recommended Final Code)</h3>
+        <div class="code-block">
+            <pre>
+<span class="comment">// Tidak ada konflik, nama method berbeda dan tidak bentrok dengan method bawaan</span>
+<span class="keyword">extension</span> <span class="type">StringToNumber</span> <span class="keyword">on</span> String {
+    <span class="type">int</span> toIntSafe() => int.tryParse(<span class="keyword">this</span>) ?? 0;
+    <span class="type">double</span> toDoubleSafe() => double.tryParse(<span class="keyword">this</span>) ?? 0.0;
+}
+
+<span class="keyword">extension</span> <span class="type">StringOps</span> <span class="keyword">on</span> String {
+    <span class="comment">// bisa juga extension lain tanpa konflik</span>
+    String get reversed => split('').reversed.join();
+}
+
+<span class="type">void</span> main() {
+    String angka = <span class="string">'123'</span>;
+    print(angka.toIntSafe());      <span class="comment">// 123 (int)</span>
+    print(angka.toDoubleSafe());   <span class="comment">// 123.0 (double)</span>
+    print(angka.reversed);         <span class="comment">// "321"</span>
+}
+            </pre>
+        </div>
+        <p>Pendekatan di atas menjawab akar masalah: <strong>menghilangkan ambiguitas method signature</strong>, sekaligus memperbaiki logika parsing yang benar dan aman.</p>
+    </div>
+
+    <footer>
+        🧠 Penjelasan berdasarkan mekanisme extension Dart · Konflik method dengan nama & parameter sama tidak dibedakan dari return type<br>
+        Solusi diadaptasi dari best practice extension methods & explicit resolution.
+    </footer>
+</div>
+</body>
+</html>
+```
